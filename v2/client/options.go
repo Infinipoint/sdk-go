@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"fmt"
+
 	"github.com/cloudevents/sdk-go/v2/binding"
 )
 
@@ -80,6 +81,18 @@ func WithPollGoroutines(pollGoroutines int) Option {
 	return func(i interface{}) error {
 		if c, ok := i.(*ceClient); ok {
 			c.pollGoroutines = pollGoroutines
+		}
+		return nil
+	}
+}
+
+// WithSyncInvoker configures whether receiver invokes callback asynchronously
+// poll the Receiver/Responder/Protocol implementations.
+// Default value is false
+func WithSyncInvoker(syncInvoker bool) Option {
+	return func(i interface{}) error {
+		if c, ok := i.(*ceClient); ok {
+			c.syncInvoker = syncInvoker
 		}
 		return nil
 	}

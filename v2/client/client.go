@@ -92,6 +92,8 @@ type ceClient struct {
 	receiverMu                sync.Mutex
 	eventDefaulterFns         []EventDefaulter
 	pollGoroutines            int
+
+	syncInvoker bool
 }
 
 func (c *ceClient) applyOptions(opts ...Option) error {
@@ -242,6 +244,13 @@ func (c *ceClient) StartReceiver(ctx context.Context, fn interface{}) error {
 
 				if err != nil {
 					cecontext.LoggerFrom(ctx).Warn("Error while receiving a message: ", err)
+					continue
+				}
+
+				if c.syncInvoker { //the new option
+					if err := c.invoker.Invoke(ctx, msg, respFn); err != nil {
+						cecontext.LoggerFrom(ctx).Warn("Error while synchronously handling a message: ", err)
+					}
 					continue
 				}
 
